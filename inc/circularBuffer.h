@@ -13,24 +13,31 @@
 
 typedef struct
 {
-  uint8_t* buf;
+  uint8_t* data;
   uint32_t len;
-} cirData_t;
+} cData_t;
 
 typedef struct
 {
   uint32_t head;
   uint32_t tail;
-  uint32_t que;
+  uint32_t curSize;
+  uint32_t maxSize;
   uint8_t  lock;
-  cirData_t* data;
-} cirBuf_t;
+  cData_t* buf;
+} cBuf_t;
 
 
 /* ************************** */
 /* **** public functions **** */
 
-void cirBufInit (cirBuf_t* buf);
+void cBufInit (cBuf_t* buf, uint32_t bufLen, uint32_t dataLen);
+
+void cBufWrite (cBuf_t* buf);
+
+void cBufRead (cBuf_t* buf);
+
+void cBufReset (cBuf_t* buf);
 
 
 /* *********************** */

@@ -3,10 +3,10 @@
 #define CIR_BUF_LEN 256
 #define CIR_DATA_LEN 64
 
-cirBuf_t cBuf[CIR_BUF_LEN];
+cBuf_t cBuf;
 
 int main (void) {
-  cirBufInit((cirBuf_t*)&cBuf);
+  cBufInit(&cBuf, CIR_BUF_LEN, CIR_DATA_LEN);
   
   return 0;
 }
