@@ -9,10 +9,10 @@
 #define __HELPERS_H
 
 /* switch states */
-enum 
+typedef enum 
 {
-  OFF,
-  ON
+  OFF = 0x00U,
+  ON  = 0x01U
 } switchState_t;
 
 #endif /* __HELPERS_H */
