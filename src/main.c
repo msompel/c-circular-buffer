@@ -84,7 +84,7 @@ int main (void) {
 
 void showBuffer (cBuf_t* buf, char* label)
 {
-  printf("%s [ Head: %02d Tail: %02d Size: %02d Buffer: \"%s\" ]\r\n", label, cBuf.head, cBuf.tail, cBuf.curSize, cBuf.data);
+  printf("%s [ Head: %02d Tail: %02d Size: %02d Buffer: \"%s\" ]\r\n", label, buf->head, buf->tail, buf->curSize, buf->data);
 }
 
 void showStatus (cBufStatus_t status)
