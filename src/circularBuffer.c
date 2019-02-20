@@ -1,5 +1,4 @@
 #include "circularBuffer.h"
-#include "helpers.h"
 #include <stdint.h>
 
 
@@ -17,33 +16,48 @@ static uint32_t shiftPos (uint32_t maxSize, uint32_t pos);
 
 void cBufInit (cBuf_t* buf, uint8_t* data, uint32_t maxSize)
 {
-  buf->head = buf->tail = buf->curSize = 0;
-  buf->lock = OFF;
+  buf->head = buf->tail = buf->curSize = buf->lock = buf->overflow = 0;
   buf->maxSize = maxSize;
   buf->data = data;
 }
 
+cBufStatus_t cBufStatus (cBuf_t* buf)
+{
+  if(!buf->curSize) { return CBUF_EMPTY; }
+
+  if(buf->overflow) { return CBUF_OVER; }
+
+  return CBUF_OK;
+}
+
 cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* data, uint32_t len)
 {
-  /* stop condition flags */
-  if((buf->curSize + len) > buf->maxSize) { return CBUF_FULL; }
-  
-  buf->lock = ON;
+  buf->lock = 1;
+
+  static cBufStatus_t status = CBUF_OK;
 
   static uint32_t i;
   for(i=0; i<len; i++)
   {
-    /* write data to buffer */
-    buf->data[buf->tail] = data[i];
+    /* check for buffer overflow, drop overflow buffer characters */
+    if(buf->curSize == buf->maxSize) { 
+      buf->overflow = 1;
+      status = CBUF_OVER;
+    }
+    else
+    {
+      /* write data to buffer */
+      buf->data[buf->tail] = data[i];
 
-    /* update trackers */
-    buf->tail = shiftPos(buf->maxSize, buf->tail);
-    buf->curSize++;
+      /* update trackers */
+      buf->tail = shiftPos(buf->maxSize, buf->tail);
+      buf->curSize++;
+    }
   }
 
-  buf->lock = OFF;
+  buf->lock = 0;
 
-  return CBUF_OK;
+  return status;
 }
 
 cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* data, uint32_t len)

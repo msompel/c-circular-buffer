@@ -77,7 +77,6 @@ int main (void) {
       showStatus(status);
       break;
     }
-    
   }
   return 0;
 }
@@ -98,8 +97,8 @@ void showStatus (cBufStatus_t status)
     case CBUF_EMPTY:
       statusTxt = "Empty";
       break;
-    case CBUF_FULL:
-      statusTxt = "Full";
+    case CBUF_OVERFLOW:
+      statusTxt = "Overflow";
       break;
   }
   printf("%s\r\n", statusTxt);

@@ -14,7 +14,7 @@ typedef enum
 {
   CBUF_OK    = 0x00U,
   CBUF_EMPTY = 0x01U,
-  CBUF_FULL  = 0x02U
+  CBUF_OVER  = 0x02U
 } cBufStatus_t;
 
 typedef struct
@@ -22,6 +22,7 @@ typedef struct
   uint32_t head;
   uint32_t tail;
   uint8_t  lock;
+  uint8_t  overflow;
   uint32_t curSize;
   uint32_t maxSize;
   uint8_t* data;
@@ -40,6 +41,11 @@ typedef struct
  *  - points buf->data to data array
  */ 
 void cBufInit (cBuf_t* buf, uint8_t* data, uint32_t maxSize);
+
+/*  cBufStatus
+ *  - returns current status flag
+ */ 
+cBufStatus_t cBufStatus (cBuf_t* buf);
 
 /*  cBufWrite
  *  - writes data to circular buffer one byte at a time
