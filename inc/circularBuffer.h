@@ -1,5 +1,5 @@
 /* 
- *	Circular Buffer
+ *  Circular FiFo Buffer
  *
  *  @author John E Maddox
  *
