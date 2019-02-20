@@ -34,10 +34,10 @@ cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* data, uint32_t len)
   for(i=0; i<len; i++)
   {
     /* write data to buffer */
-    buf->data[buf->head] = data[i];
+    buf->data[buf->tail] = data[i];
 
     /* update trackers */
-    buf->head = shiftPos(buf->maxSize, buf->head);
+    buf->tail = shiftPos(buf->maxSize, buf->tail);
     buf->curSize++;
   }
 
@@ -64,10 +64,10 @@ cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* data, uint32_t len)
     if(i < rLen)
     {
       /* read data from buffer */
-      data[i] = buf->data[buf->tail];
+      data[i] = buf->data[buf->head];
 
       /* update trackers */
-      buf->tail = shiftPos(buf->maxSize, buf->tail);
+      buf->head = shiftPos(buf->maxSize, buf->head);
       buf->curSize--;
     }
     else
