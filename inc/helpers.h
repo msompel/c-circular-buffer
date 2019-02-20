@@ -1,5 +1,5 @@
 /* 
- *	Helper Functions and data types
+ *  Helper Functions and data types
  *
  *  @author John E Maddox
  *

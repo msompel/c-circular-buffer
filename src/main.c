@@ -1,9 +1,3 @@
-/*
- *  Demonstration of 
- * 
- * 
- * 
- */
 #include "circularBuffer.h"
 #include <stdio.h>
 
@@ -36,7 +30,7 @@ char* testDataLoop[TEST_LOOP] = {
 
 /*** declarations ***/
 void showBuffer (cBuf_t* buf, char* label);
-void showError (cBufStatus_t status);
+void showStatus (cBufStatus_t status);
 
 
 /*** main ***/
@@ -59,7 +53,7 @@ int main (void) {
     }
     else
     {
-     showError(status);
+     showStatus(status);
     }
   }
 
@@ -80,7 +74,7 @@ int main (void) {
     }
     else
     {
-      showError(status);
+      showStatus(status);
       break;
     }
     
@@ -93,7 +87,7 @@ void showBuffer (cBuf_t* buf, char* label)
   printf("%s [ Head: %02d Tail: %02d Size: %02d Buffer: \"%s\" ]\r\n", label, cBuf.head, cBuf.tail, cBuf.curSize, cBuf.data);
 }
 
-void showError (cBufStatus_t status)
+void showStatus (cBufStatus_t status)
 {
   static char* statusTxt;
   switch (status)
@@ -106,9 +100,6 @@ void showError (cBufStatus_t status)
       break;
 	  case CBUF_FULL:
       statusTxt = "Full";
-      break;
-    case CBUF_LOCK:
-      statusTxt = "Lock";
       break;
   }
   printf("%s\r\n", statusTxt);
