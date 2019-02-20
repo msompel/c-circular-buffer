@@ -98,7 +98,7 @@ void showStatus (cBufStatus_t status)
     case CBUF_EMPTY:
       statusTxt = "Empty";
       break;
-	  case CBUF_FULL:
+    case CBUF_FULL:
       statusTxt = "Full";
       break;
   }
