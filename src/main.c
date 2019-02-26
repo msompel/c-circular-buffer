@@ -1,81 +1,66 @@
 #include "circularBuffer.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define BUF_SIZE   10
-#define WRITE_SIZE 5
-#define READ_SIZE  6
-
-#define TEST_LOOP 3
+#define BUF_SIZE   2
+#define TEST_WRITE 5
+#define TEST_LOOP  10
 
 /* cBuf_t manages the circular buffer */
 cBuf_t cBuf;
-
-/* this is the array that will hold the buffer data, cBufInit sets up a pointer to this array inside cBuf_t */
-uint8_t cData[BUF_SIZE];
-
-/* data is returned to a fixed size variable */
-uint8_t readData[READ_SIZE];
-
-/* status of buffer */
-cBufStatus_t status;
+cData_t cDataBuf[BUF_SIZE];
 
 
 /*** Test variables ***/
-static size_t i = 0;
-char* testDataLoop[TEST_LOOP] = {
-  "Data1",
-  "Data2",
-  "Data3"
+char* testData[TEST_WRITE] = {
+  "01 Data Test",
+  "02 Data",
+  "03 Hello, I'm data 0",
+  "04 More data",
+  "05 guess what? Data!!!"
 };
+
 
 /*** declarations ***/
 void showBuffer (cBuf_t* buf, char* label);
-void showStatus (cBufStatus_t status);
 
 
 /*** main ***/
 int main (void) {
   
-  cBufInit(&cBuf, (uint8_t*)&cData, BUF_SIZE);
+  cBufInit(&cBuf, (cData_t*)&cDataBuf, BUF_SIZE);
 
-  /*  write to buffer
-   *
-   *  loops through the test data
-   *  Our circular buffer is 10 bytes while our test data contains 3 blocks of 5 bytes (total of 15 bytes)
-   *  This means we will fill our buffer up after two cycles, the third will return a full flag
-   */
+  /*  loops through test data */
+  uint16_t i, j = 0;
   for(i=0; i<TEST_LOOP; i++)
   {
-    status = cBufWrite(&cBuf, (uint8_t*)testDataLoop[i], WRITE_SIZE);
-    if (status == CBUF_OK)
+    /* write to buffer */
+    if(j < TEST_WRITE)
     {
-      showBuffer(&cBuf, "Write");
-    }
-    else
-    {
-     showStatus(status);
-    }
-  }
+      cData_t input = { (uint8_t*)testData[j], strlen(testData[j]) };
 
-  /*  Read from buffer
-   * 
-   *  Using a loop, data is read from our buffer until a buffer empty flag is sent
-   *  Our buffer is 10 bytes, but our read buffer is 6
-   *  Because our buffer only holds a total of 10 bytes, we will see two outputs. One 6 and the next 4.
-   *  When the buffer is empty, a flag will be returned
-   */
-  while(1)
-  {
-    status = cBufRead(&cBuf, (uint8_t*)&readData, READ_SIZE);
-    if(status != CBUF_EMPTY)
-    {
-      showBuffer(&cBuf, "Read");
-      printf("  OUTPUT: %s\r\n", readData);
+      if(cBufWrite(&cBuf, input) != CBUF_FULL)
+      {
+        showBuffer(&cBuf, "W");
+        j++;
+      }
+      else
+      {
+        printf("BUFFER FULL\r\n");
+      }
     }
-    else
+    
+    /* read from buffer */
+    if(i % 2 == 0)
     {
-      showStatus(status);
-      break;
+      cData_t output;
+
+      if(cBufRead(&cBuf, &output) == CBUF_OK)
+      {
+        showBuffer(&cBuf, "R");
+        printf("OUTPUT: %s (%d)\r\n", output.data, output.len);
+      }
     }
   }
   return 0;
@@ -83,23 +68,14 @@ int main (void) {
 
 void showBuffer (cBuf_t* buf, char* label)
 {
-  printf("%s [ Head: %02d Tail: %02d Size: %02d Buffer: \"%s\" ]\r\n", label, buf->head, buf->tail, buf->curSize, buf->data);
-}
+  printf("  %s [ Head: %02d Tail: %02d Size: %02d ]\r\n", label, buf->head, buf->tail, buf->curSize);
 
-void showStatus (cBufStatus_t status)
-{
-  static char* statusTxt;
-  switch (status)
+  uint32_t i = 0;
+  for(i=0; i<buf->maxSize;i++)
   {
-    case CBUF_OK:
-      statusTxt = "Okay";
-      break;
-    case CBUF_EMPTY:
-      statusTxt = "Empty";
-      break;
-    case CBUF_OVERFLOW:
-      statusTxt = "Overflow";
-      break;
+    if(buf->data[i].len)
+    {
+      printf("      [%d] %s\r\n", i, buf->data[i].data);
+    }
   }
-  printf("%s\r\n", statusTxt);
 }

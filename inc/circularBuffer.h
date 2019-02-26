@@ -14,18 +14,22 @@ typedef enum
 {
   CBUF_OK    = 0x00U,
   CBUF_EMPTY = 0x01U,
-  CBUF_OVER  = 0x02U
+  CBUF_FULL  = 0x02U
 } cBufStatus_t;
+
+typedef struct
+{
+  uint8_t* data;
+  uint16_t len;
+} cData_t;
 
 typedef struct
 {
   uint32_t head;
   uint32_t tail;
-  uint8_t  lock;
-  uint8_t  overflow;
   uint32_t curSize;
   uint32_t maxSize;
-  uint8_t* data;
+  cData_t* data;
 } cBuf_t;
 
 
@@ -40,25 +44,20 @@ typedef struct
  *  - sets default values
  *  - points buf->data to data array
  */ 
-void cBufInit (cBuf_t* buf, uint8_t* data, uint32_t maxSize);
-
-/*  cBufStatus
- *  - returns current status flag
- */ 
-cBufStatus_t cBufStatus (cBuf_t* buf);
+void cBufInit (cBuf_t* buf, cData_t* data, uint32_t maxSize);
 
 /*  cBufWrite
  *  - writes data to circular buffer one byte at a time
  *  - only writes data if there is enough space available in the buffer
  *  - sets lock to prevent reading and writing to same data block
  */
-cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* data, uint32_t len);
+cBufStatus_t cBufWrite (cBuf_t* buf, cData_t data);
 
 /*  cBufRead
  *  - writes data from buffer to data array one byte at a time
  *  - fills empty space in data array with zeros
  *  - locks memory block that is being written to
  */
-cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* data, uint32_t len);
+cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data);
 
 #endif /* __CIRCULAR_BUFFER_H */
