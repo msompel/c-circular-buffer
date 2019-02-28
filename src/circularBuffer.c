@@ -1,49 +1,51 @@
 #include "circularBuffer.h"
 #include <stdint.h>
-//#include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 /* **************************** */
 /* ***** public functions ***** */
 
-void cBufInit (cBuf_t* buf, cData_t* data, uint32_t maxSize)
+void cBufInit (cBuf_t* buf, uint32_t maxSize)
 {
   buf->head = buf->tail = buf->curSize = 0;
   buf->maxSize = maxSize;
-  buf->data = data;
-  // QUESTION: are there advantages to using malloc here?
-  //buf->data = (cData_t**)malloc(maxSize * sizeof(cData_t*));
+  buf->data = (uint8_t*)malloc(maxSize);
+  // TODO: add memory cleanup function
 }
 
-cBufStatus_t cBufWrite (cBuf_t* buf, cData_t data)
+cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data)
 {
   /* stop condition flags */
-  if(buf->curSize >= buf->maxSize) { return CBUF_FULL; }
+  if((buf->curSize + data->len) >= buf->maxSize) { return CBUF_FULL; }
 
   /* data in to buffer */
-  buf->data[buf->tail] = data;
+  memcpy(&buf->data[buf->tail], &data->data[0], data->len);
 
   /* update trackers */
-  buf->tail = (buf->tail + 1) % buf->maxSize;
-  buf->curSize++;
+  buf->tail = (buf->tail + data->len) % buf->maxSize;
+  buf->curSize = buf->curSize + data->len;
   
   return CBUF_OK;
 }
 
-cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data)
+cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data, uint32_t len)
 {
   /* stop condition flags */
   if(!buf->curSize) { return CBUF_EMPTY; }
+
+  // TODO: use data.len and buf.CurSize to determine return size
+  /* find return len */
+  rLen = ()
     
   /* buffer to output */
-  // QUESTION: should I use memcpy here?
-  // should i use pointers instead?
-  data->len = buf->data[buf->head].len;
-  data->data = buf->data[buf->head].data;
+  // what if memory needed wraps?
+  //memcpy(&data->data[0], &buf->data[buf->head], data->len);
 
   /* update trackers */
-  buf->head = (buf->head + 1) % buf->maxSize;
-  buf->curSize--;
+  buf->head = (buf->head + data->len) % buf->maxSize;
+  buf->curSize = buf->curSize - data->len;
 
   return CBUF_OK;
 }
