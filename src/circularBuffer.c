@@ -21,6 +21,7 @@ cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data)
 
   /* write buffer memory */
   uint32_t rem = buf->maxSize - buf->tail;
+  
   if(data->len < rem)
   {
     memcpy(&buf->data[buf->tail], &data->data[0], data->len);

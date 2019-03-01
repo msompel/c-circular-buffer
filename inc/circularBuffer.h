@@ -38,30 +38,33 @@ typedef struct
 
 /*  cBufInit
  *  buf:     the controller for the buffer
- *  data:    uint8_t static array (ex. uint8_t data[1024])
  *  maxSize: this is the size of the data array (ex. 1024)
  * 
  *  - sets default values
- *  - points buf->data to data array
+ *  - allocates memory for data buffer based on maxSize
  */ 
 void cBufInit (cBuf_t* buf, uint32_t maxSize);
 
 /*  cBufWrite
- *  - writes data to circular buffer one byte at a time
+ *  - writes data to circular buffer
  *  - only writes data if there is enough space available in the buffer
- *  - sets lock to prevent reading and writing to same data block
  */
 cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data);
 
 /*  cBufRead
- *  - writes data from buffer to data array one byte at a time
- *  - fills empty space in data array with zeros
- *  - locks memory block that is being written to
+ *  - writes data from buffer to data array
+ *  - dynamically allocates output memory, use cBufFreeData to free memory
  */
 cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data, uint16_t len);
 
+/*  cBufFreeData
+ *  - free output memory
+ */
 void cBufFreeData (cData_t* data);
 
+/*  cBufFree
+ *  - free data buffer memory
+ */
 void cBufFree (cBuf_t* buf);
 
 #endif /* __CIRCULAR_BUFFER_H */
