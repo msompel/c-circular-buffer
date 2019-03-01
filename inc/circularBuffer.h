@@ -58,6 +58,10 @@ cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data);
  *  - fills empty space in data array with zeros
  *  - locks memory block that is being written to
  */
-cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data, uint32_t len);
+cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data, uint16_t len);
+
+void cBufFreeData (cData_t* data);
+
+void cBufFree (cBuf_t* buf);
 
 #endif /* __CIRCULAR_BUFFER_H */

@@ -4,21 +4,24 @@
 #include <string.h>
 
 #define BUF_SIZE   32
-#define RTN_SIZE   8
+#define RTN_SIZE   15
 #define TEST_WRITE 5
-#define TEST_LOOP  10
+#define TEST_LOOP  20
 
 /* cBuf_t manages the circular buffer */
 cBuf_t cBuf;
 
 /*** Test variables ***/
 char* testData[TEST_WRITE] = {
-  "01 Data Test",
-  "02 Data",
-  "03 Hello, I'm data 0",
-  "04 More data",
-  "05 guess what? Data!!!"
+  "{ 01 Data }",
+  "{ 02 Data Test }",
+  "{ 03 Data Data Data }",
+  "{ 04 End with zero } -> 0",
+  "{ 05 This is data. }"
 };
+
+uint16_t testDataPos = 0;
+uint8_t  testDataOut[128];
 
 
 /*** declarations ***/
@@ -54,27 +57,27 @@ int main (void) {
     }
     
     /* read from buffer */
-    // if(i % 2 == 0)
-    // {
-    //   if(cBufRead(&cBuf, &output, RTN_SIZE) == CBUF_OK)
-    //   {
-    //     showBuffer(&cBuf, "R");
-    //     printf("OUTPUT: %s (%d)\r\n", output.data, output.len);
-    //   }
-    // }
+    if(cBufRead(&cBuf, &output, RTN_SIZE) == CBUF_OK)
+    {
+      showBuffer(&cBuf, "R");
+      memcpy(&testDataOut[testDataPos], &output.data[0], output.len);
+      testDataPos = testDataPos + output.len;
+      cBufFreeData (&output);
+    }
+
   }
+
+  /* free memory */
+  cBufFree(&cBuf);
+  showBuffer(&cBuf, "F");
+
+  /* print results */
+  printf("\r\nOUTPUT:\r\n\"%.*s\"\r\n", testDataPos, testDataOut);
+
   return 0;
 }
 
 void showBuffer (cBuf_t* buf, char* label)
 {
   printf("  %s [ Head: %02d Tail: %02d Size: %02d ]\r\n", label, buf->head, buf->tail, buf->curSize);
-
-  printf("    [ ");
-  uint16_t i;
-  for(i=0; i<buf->curSize; i++)
-  {
-    printf("%c", buf->data[i]);
-  }
-  printf(" ]\r\n");
 }
