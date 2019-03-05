@@ -17,7 +17,7 @@ void cBufInit (cBuf_t* buf, uint32_t maxSize)
 cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data)
 {
   /* stop condition flags */
-  if((buf->curSize + data->len) >= buf->maxSize) { return CBUF_FULL; }
+  if((buf->curSize + data->len) > buf->maxSize) { return CBUF_FULL; }
 
   /* write buffer memory */
   uint32_t rem = buf->maxSize - buf->tail;
