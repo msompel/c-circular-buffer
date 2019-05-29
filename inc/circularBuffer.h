@@ -19,12 +19,6 @@ typedef enum
 
 typedef struct
 {
-  uint8_t* data;
-  uint16_t len;
-} cData_t;
-
-typedef struct
-{
   uint32_t head;
   uint32_t tail;
   uint32_t curSize;
@@ -49,18 +43,13 @@ void cBufInit (cBuf_t* buf, uint32_t maxSize);
  *  - writes data to circular buffer
  *  - only writes data if there is enough space available in the buffer
  */
-cBufStatus_t cBufWrite (cBuf_t* buf, cData_t* data);
+cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* dataIn, uint16_t lenIn);
 
 /*  cBufRead
  *  - writes data from buffer to data array
  *  - dynamically allocates output memory, use cBufFreeData to free memory
  */
-cBufStatus_t cBufRead (cBuf_t* buf, cData_t* data, uint16_t len);
-
-/*  cBufFreeData
- *  - free output memory
- */
-void cBufFreeData (cData_t* data);
+cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* dataOut, uint16_t lenOut);
 
 /*  cBufFree
  *  - free data buffer memory

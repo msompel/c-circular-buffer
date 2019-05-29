@@ -13,3 +13,7 @@ A simple Circular FiFo Buffer for embedded systems.
 - **build:** temporary directory that holds the compiled object files.
 - **src:** project source files.
 - **inc:** project include files.
+
+## Tests
+
+A very basic set of unit tests are included.

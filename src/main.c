@@ -1,83 +1,118 @@
+#include "ansiColors.h"
+#include "unitTests.h"
 #include "circularBuffer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define BUF_SIZE   32
-#define RTN_SIZE   15
-#define TEST_WRITE 5
-#define TEST_LOOP  20
+#define BUF_SIZE  32
 
 /* cBuf_t manages the circular buffer */
 cBuf_t cBuf;
+cBufStatus_t status;
 
-/*** Test variables ***/
-char* testData[TEST_WRITE] = {
-  "{ 01 Data }",
-  "{ 02 Data Test }",
-  "{ 03 Data Data Data }",
-  "{ 04 End with zero } -> 0",
-  "{ 05 This is data. }"
-};
+uint8_t  outputBuffer[128];
 
-uint16_t testDataPos = 0;
-uint8_t  testDataOut[128];
-
-
-/*** declarations ***/
-void showBuffer (cBuf_t* buf, char* label);
-
-
-/*** main ***/
 int main (void) {
-  
+
+  ansiInit();
   cBufInit(&cBuf, BUF_SIZE);
 
-  cData_t input, output;
+  /* ******************* */
+  /* **** cBufWrite **** */
 
-  /*  loops through test data */
-  uint16_t i, j = 0;
-  for(i=0; i<TEST_LOOP; i++)
-  {
-    /* write to buffer */
-    if(j < TEST_WRITE)
-    {
-      input.data = (uint8_t*)testData[j];
-      input.len = strlen(testData[j]);
+  assertGroup("cBufWrite()");
 
-      if(cBufWrite(&cBuf, &input) != CBUF_FULL)
-      {
-        showBuffer(&cBuf, "W");
-        j++;
-      }
-      else
-      {
-        printf("BUFFER FULL\r\n");
-      }
-    }
-    
-    /* read from buffer */
-    if(cBufRead(&cBuf, &output, RTN_SIZE) == CBUF_OK)
-    {
-      showBuffer(&cBuf, "R");
-      memcpy(&testDataOut[testDataPos], &output.data[0], output.len);
-      testDataPos = testDataPos + output.len;
-      cBufFreeData (&output);
-    }
+  /* input greater than buffer */
+  status = cBufWrite(&cBuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
+  assertIntEqual("Input greater than buffer should return CBUF_FULL", status, CBUF_FULL);
 
-  }
+  /* valid input */
+  status = cBufWrite(&cBuf, (uint8_t*)"{ First Input DATA }", 20);
+  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Buffer size should equal size of input", cBuf.curSize, 20);
 
-  /* free memory */
+  /* valid input to fill buffer to max */
+  status = cBufWrite(&cBuf, (uint8_t*)"{ Second }", 10);
+  assertIntEqual("Buffer size should increase when writing", cBuf.curSize, 30);
+
+  /* verify buffer full flag when inserting one more byte */
+  status = cBufWrite(&cBuf, (uint8_t*)"OVER", 4);
+  assertIntEqual("Writing to a full buffer should return CBUF_FULL", status, CBUF_FULL);
+
+
+  /* ******************* */
+  /* **** cBufRead **** */
+
+  assertGroup("cBufRead()");
+
+  /* valid read output */
+  status = cBufRead(&cBuf, outputBuffer, 20);
+  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Buffer size should decrease when reading", cBuf.curSize, 10);
+  assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ First Input DATA }");
+  
+
+  /* *************************** */
+  /* ** Data Integrity Checks ** */
+
+  /*  End of buffer jumps to index 0 when there is free space
+   *  
+   *  When we write data that exceeds the available space at the end of the buffer, 
+   *  and there is enough space at the begining of the buffer to hold the remaining data,
+   *  the data should be written to the buffer in two chucks, one at the end and one at the beginning.
+   * 
+   *      Buffer Size: 10
+   *  Space Available: 22 (Buffer Max - Buffer Size)
+   */
+
+  assertGroup("Verify Data Wrapping");
+
+  status = cBufWrite(&cBuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
+  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Buffer size should equal size of input", cBuf.curSize, 30);
+
+  cBufRead(&cBuf, outputBuffer, 30);
+  assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ Second }{ Wrap Input DATA. }");
+
+  /*  When 
+   *  
+   *  When we write data that exceeds the available space at the end of the buffer, 
+   *  and there is enough space at the begining of the buffer to hold the remaining data,
+   *  the data should be written to the buffer in two chucks, one at the end and one at the beginning.
+   * 
+   *      Buffer Size: 0
+   *  Space Available: 32 (Buffer Max - Buffer Size)
+   */
+
+  assertGroup("Verify output string null terminators");
+
+  /* input equal to buffer fills entire buffer */
+  cBufWrite(&cBuf, (uint8_t*)"{ This data equals buffer size }", 32);
+  cBufRead(&cBuf, outputBuffer, 32);
+
+  assertStrEqual("Filling buffer should not drop any data", (char*)outputBuffer, "{ This data equals buffer size }");
+
+  /* input */
+  cBufWrite(&cBuf, (uint8_t*)"{ Buffer Data }", 15);
+  assertIntEqual("Buffer contains 15 bytes of data", cBuf.curSize, 15);
+  cBufRead(&cBuf, outputBuffer, 25);
+
+  assertStrEqual("Read length greater than the buffer should be null terminated", (char*)outputBuffer, "{ Buffer Data }");
+ 
+
+  /* ****************** */
+  /* **** cBufFree **** */
+
+  assertGroup("cBufFree()");
+
   cBufFree(&cBuf);
-  showBuffer(&cBuf, "F");
 
-  /* print results */
-  printf("\r\nOUTPUT:\r\n\"%.*s\"\r\n", testDataPos, testDataOut);
+  assertIntEqual("Buffer curSize should be 0", cBuf.curSize, 0);
+  assertIntEqual("Buffer maxSize should be 0", cBuf.maxSize, 0);
+  assertIntEqual("Buffer head should be 0", cBuf.head, 0);
+  assertIntEqual("Buffer tail should be 0", cBuf.tail, 0);
+  assertPtrNull("Buffer Pointer should be NULL", cBuf.data);
 
   return 0;
-}
-
-void showBuffer (cBuf_t* buf, char* label)
-{
-  printf("  %s [ Head: %02d Tail: %02d Size: %02d ]\r\n", label, buf->head, buf->tail, buf->curSize);
 }
