@@ -75,11 +75,11 @@ int main (void) {
   cBufRead(&cBuf, outputBuffer, 30);
   assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ Second }{ Wrap Input DATA. }");
 
-  /*  When 
+  /*  Null Terminating string output 
    *  
-   *  When we write data that exceeds the available space at the end of the buffer, 
-   *  and there is enough space at the begining of the buffer to hold the remaining data,
-   *  the data should be written to the buffer in two chucks, one at the end and one at the beginning.
+   *  Because the buffer is usually going to be a fixed size,
+   *  a null terminator needs to be sent when data is being read.
+   *  This is expecially important when the requested data length is greater than the amount of data in the buffer.
    * 
    *      Buffer Size: 0
    *  Space Available: 32 (Buffer Max - Buffer Size)
