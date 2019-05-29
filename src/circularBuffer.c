@@ -47,11 +47,16 @@ cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* dataOut, uint16_t lenOut)
   /* stop condition flags */
   if(!buf->curSize) { return CBUF_EMPTY; }
 
-  /* find return len */
-  uint16_t rtnLen = (buf->curSize < lenOut) ? buf->curSize : lenOut;
-  
-  /* add null terminator */
-  dataOut[rtnLen] = '\0';
+  /* find return length */
+  uint16_t rtnLen = lenOut;
+
+  if(buf->curSize < lenOut)
+  {
+    rtnLen = buf->curSize;
+
+    /* add null terminator */
+    dataOut[rtnLen] = '\0';
+  }
 
   /* find space remaining in buffer */
   uint32_t spaceTillEnd = buf->maxSize - buf->head;
