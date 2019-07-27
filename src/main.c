@@ -1,9 +1,6 @@
 #include "ansiColors.h"
 #include "unitTests.h"
 #include "circularBuffer.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define BUF_SIZE  32
 
