@@ -33,4 +33,4 @@ $(ODIR)/%.o: $(SDIR)/%.$(EXT)
 	$(CC) $(CCFLAGS) $< -o $@ -I $(IDIR)
 
 clean:
-	rm -rf $(ODIR) $(TARGET)
+	rm -rf $(ODIR) $(TARGET)*

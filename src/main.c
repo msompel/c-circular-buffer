@@ -12,7 +12,6 @@ uint8_t  outputBuffer[128];
 
 int main (void) {
 
-  ansiInit();
   cBufInit(&cBuf, BUF_SIZE);
 
   /* ******************* */
@@ -22,11 +21,11 @@ int main (void) {
 
   /* input greater than buffer */
   status = cBufWrite(&cBuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
-  assertIntEqual("Input greater than buffer should return CBUF_FULL", status, CBUF_FULL);
+  assertIntEqual("Input greater than buffer should return eCBufFull", status, eCBufFull);
 
   /* valid input */
   status = cBufWrite(&cBuf, (uint8_t*)"{ First Input DATA }", 20);
-  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
   assertIntEqual("Buffer size should equal size of input", cBuf.curSize, 20);
 
   /* valid input to fill buffer to max */
@@ -35,7 +34,7 @@ int main (void) {
 
   /* verify buffer full flag when inserting one more byte */
   status = cBufWrite(&cBuf, (uint8_t*)"OVER", 4);
-  assertIntEqual("Writing to a full buffer should return CBUF_FULL", status, CBUF_FULL);
+  assertIntEqual("Writing to a full buffer should return eCBufFull", status, eCBufFull);
 
 
   /* ******************* */
@@ -45,7 +44,7 @@ int main (void) {
 
   /* valid read output */
   status = cBufRead(&cBuf, outputBuffer, 20);
-  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
   assertIntEqual("Buffer size should decrease when reading", cBuf.curSize, 10);
   assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ First Input DATA }");
   
@@ -66,7 +65,7 @@ int main (void) {
   assertGroup("Verify Data Wrapping");
 
   status = cBufWrite(&cBuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
-  assertIntEqual("Should return CBUF_OK when valid", status, CBUF_OK);
+  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
   assertIntEqual("Buffer size should equal size of input", cBuf.curSize, 30);
 
   cBufRead(&cBuf, outputBuffer, 30);

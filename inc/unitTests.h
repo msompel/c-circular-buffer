@@ -1,3 +1,4 @@
+
 /* 
  *  Basic Unit Tests
  *
@@ -8,12 +9,11 @@
 #ifndef __UNIT_TESTS_H
 #define __UNIT_TESTS_H
 
-#include <stdint.h>
-
 typedef enum 
 {
-  ASSERT_FALSE,
-  ASSERT_TRUE
+  eAssertFalse,
+  eAssertTrue,
+  endOfAssertState
 } assertState_t;
 
 
@@ -66,11 +66,11 @@ assertState_t assertIntLessThan (char* describe, int input, int expect);
 /* *************************** */
 /* ****** array asserts ****** */
 
-/*  assertArrayElements
+/*  assertIntArrayElements
  *  - compares each array element for equality up to length
  *  - does not compare array length or size
  */
-assertState_t assertArrayElements (char* describe, uint8_t* input, uint8_t* expect, uint16_t length);
+assertState_t assertIntArrayElements (char* describe, int* input, int* expect, int length);
 
 
 /* **************************** */

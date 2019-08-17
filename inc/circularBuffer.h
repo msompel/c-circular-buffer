@@ -12,9 +12,10 @@
 
 typedef enum
 {
-  CBUF_OK    = 0x00U,
-  CBUF_EMPTY = 0x01U,
-  CBUF_FULL  = 0x02U
+  eCBufOk,
+  eCBufEmpty,
+  eCBufFull,
+  endOfCBufStatus
 } cBufStatus_t;
 
 typedef struct

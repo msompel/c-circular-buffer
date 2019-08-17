@@ -1,6 +1,6 @@
 # Circular FiFo Buffer
 
-A simple Circular FiFo Buffer for embedded systems.
+A simple Circular FiFo Buffer in C for embedded systems.
 
 ## Comands
 

@@ -4,18 +4,16 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build",
+      "label": "build",
       "type": "shell",
-      "command": "mingw32-make",
+      "command": "make",
       "problemMatcher": [
         "$gcc"
       ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": "build",
       "presentation": {
-        "reveal": "never"
+        "reveal": "silent",
+        "echo": false
       }
     }
   ]

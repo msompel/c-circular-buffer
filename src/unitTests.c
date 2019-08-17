@@ -13,7 +13,7 @@ static int _testCount = 1;
 void _printResults (char* describe, assertState_t state);
 void _printStrError (char* input, char* expect, assertState_t state);
 void _printIntError (int input, int expect, assertState_t state);
-void _printCharError (uint8_t input, uint8_t expect, assertState_t state);
+
 
 /* ************************** */
 /* **** public functions **** */
@@ -97,19 +97,35 @@ assertState_t assertIntLessThan (char* describe, int input, int expect)
   return state;
 }
 
-assertState_t assertArrayElements (char* describe, uint8_t* input, uint8_t* expect, uint16_t length)
+assertState_t assertIntArrayElements (char* describe, int* input, int* expect, int length)
 {
+  int errors[length][3];
+  int errorCount = 0;
+  int i;
+  
   /* compare each element */
-  for (int i=0; i<length; i++) {
+  for (i=0; i<length; i++) {
     if (input[i] != expect[i]) {
-      _printResults(describe, ASSERT_FALSE);
-      _printCharError((uint8_t)input[i], (uint8_t)expect[i], ASSERT_FALSE);
-      return ASSERT_FALSE;
+      errors[errorCount][0] = i;
+      errors[errorCount][1] = input[i];
+      errors[errorCount][2] = expect[i];
+      errorCount++;
     }
   }
 
-  _printResults(describe, ASSERT_TRUE);
-  return ASSERT_TRUE;
+  if (errorCount)
+  {
+    _printResults(describe, eAssertFalse);
+    for(i=0; i<errorCount; i++)
+    {
+      printf(ANSI_RED "     [%d]\n" ANSI_RESET, errors[i][0]);
+      _printIntError(errors[i][1], errors[i][2], eAssertFalse);
+    }
+    return eAssertFalse;
+  }
+
+  _printResults(describe, eAssertTrue);
+  return eAssertTrue;
 }
 
 
@@ -140,31 +156,23 @@ assertState_t assertPtrNotNull (char* describe, void* input)
 
 void _printResults (char* describe, assertState_t state)
 {
-  char* results =  (state == ASSERT_TRUE) ? ANSI_GREEN "Passed!" : ANSI_RED "Failed :(";
+  char* results =  (state == eAssertTrue) ? ANSI_GREEN "Passed!" : ANSI_RED "Failed :(";
   printf(ANSI_CYAN "  %d) %s: %s" ANSI_RESET "\n", _testCount, describe, results);
   _testCount++;
 }
 
 void _printStrError (char* input, char* expect, assertState_t state)
 {
-  if (state == ASSERT_FALSE)
+  if (state == eAssertFalse)
   {
-    printf(ANSI_YELLOW "      INPUT: \"%s\"\n     EXPECT: \"%s\"\n" ANSI_RESET, input, expect);
+    printf(ANSI_YELLOW "      INPUT:  \"%s\"\n      EXPECT: \"%s\"\n" ANSI_RESET, input, expect);
   }
 }
 
 void _printIntError (int input, int expect, assertState_t state)
 {
-if (state == ASSERT_FALSE)
+if (state == eAssertFalse)
   {
-    printf(ANSI_YELLOW "      INPUT: \"%d\"\n     EXPECT: \"%d\"\n" ANSI_RESET, input, expect);
-  }
-}
-
-void _printCharError (uint8_t input, uint8_t expect, assertState_t state)
-{
-if (state == ASSERT_FALSE)
-  {
-    printf(ANSI_YELLOW "      INPUT: \"%c\"\n     EXPECT: \"%c\"\n" ANSI_RESET, input, expect);
+    printf(ANSI_YELLOW "      INPUT:  \"%d\"\n      EXPECT: \"%d\"\n" ANSI_RESET, input, expect);
   }
 }

@@ -17,7 +17,7 @@ void cBufInit (cBuf_t* buf, uint32_t maxSize)
 cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* dataIn, uint16_t lenIn)
 {
   /* stop condition flags */
-  if((buf->curSize + lenIn) > buf->maxSize) { return CBUF_FULL; }
+  if((buf->curSize + lenIn) > buf->maxSize) { return eCBufFull; }
 
   /* write buffer memory */
   uint16_t spaceTillEnd = buf->maxSize - buf->tail;
@@ -37,13 +37,13 @@ cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* dataIn, uint16_t lenIn)
   buf->tail = (buf->tail + lenIn) % buf->maxSize;
   buf->curSize = buf->curSize + lenIn;
   
-  return CBUF_OK;
+  return eCBufOk;
 }
 
 cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* dataOut, uint16_t lenOut)
 {
   /* stop condition flags */
-  if(!buf->curSize) { return CBUF_EMPTY; }
+  if(!buf->curSize) { return eCBufEmpty; }
 
   /* find return length */
   uint16_t rtnLen = lenOut;
@@ -74,7 +74,7 @@ cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* dataOut, uint16_t lenOut)
   buf->head = (buf->head + rtnLen) % buf->maxSize;
   buf->curSize = buf->curSize - rtnLen;
 
-  return CBUF_OK;
+  return eCBufOk;
 }
 
 void cBufFree (cBuf_t* buf)
