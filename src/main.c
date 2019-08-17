@@ -7,12 +7,13 @@
 /* cBuf_t manages the circular buffer */
 cBuf_t cBuf;
 cBufStatus_t status;
+uint8_t cBufData[BUF_SIZE];
 
-uint8_t  outputBuffer[128];
+uint8_t outputBuffer[128];
 
 int main (void) {
 
-  cBufInit(&cBuf, BUF_SIZE);
+  cBufInit(&cBuf, (uint8_t*)&cBufData, BUF_SIZE);
 
   /* ******************* */
   /* **** cBufWrite **** */
@@ -100,15 +101,13 @@ int main (void) {
   /* ****************** */
   /* **** cBufFree **** */
 
-  assertGroup("cBufFree()");
+  assertGroup("cBufEmpty()");
 
-  cBufFree(&cBuf);
+  cBufEmpty(&cBuf);
 
   assertIntEqual("Buffer curSize should be 0", cBuf.curSize, 0);
-  assertIntEqual("Buffer maxSize should be 0", cBuf.maxSize, 0);
   assertIntEqual("Buffer head should be 0", cBuf.head, 0);
   assertIntEqual("Buffer tail should be 0", cBuf.tail, 0);
-  assertPtrNull("Buffer Pointer should be NULL", cBuf.data);
 
   return 0;
 }

@@ -7,79 +7,87 @@
 /* **************************** */
 /* ***** public functions ***** */
 
-void cBufInit (cBuf_t* buf, uint32_t maxSize)
+void cBufInit (cBuf_t* _buf, uint8_t* _data, uint32_t _size)
 {
-  buf->head = buf->tail = buf->curSize = 0;
-  buf->maxSize = maxSize;
-  buf->data = (uint8_t*)malloc(maxSize);
+  _buf->maxSize = _size;
+  _buf->data = _data;
+
+  /* start with a clean buffer */
+  cBufEmpty(_buf);
 }
 
-cBufStatus_t cBufWrite (cBuf_t* buf, uint8_t* dataIn, uint16_t lenIn)
+cBufStatus_t cBufWrite (cBuf_t* _buf, uint8_t* _dataIn, uint16_t _lenIn)
 {
   /* stop condition flags */
-  if((buf->curSize + lenIn) > buf->maxSize) { return eCBufFull; }
+  if((_buf->curSize + _lenIn) > _buf->maxSize) { return eCBufFull; }
 
   /* write buffer memory */
-  uint16_t spaceTillEnd = buf->maxSize - buf->tail;
+  uint16_t spaceTillEnd = _buf->maxSize - _buf->tail;
 
-  if(lenIn <= spaceTillEnd)
+  if(_lenIn <= spaceTillEnd)
   {
-    memcpy(&buf->data[buf->tail], &dataIn[0], lenIn);
+    memcpy(&_buf->data[_buf->tail], &_dataIn[0], _lenIn);
   }
   else
   {
     /* wrap data to fit in buffer */
-    memcpy(&buf->data[buf->tail], &dataIn[0], spaceTillEnd);
-    memcpy(&buf->data[0], &dataIn[spaceTillEnd], (lenIn - spaceTillEnd));
+    memcpy(&_buf->data[_buf->tail], &_dataIn[0], spaceTillEnd);
+    memcpy(&_buf->data[0], &_dataIn[spaceTillEnd], (_lenIn - spaceTillEnd));
   }
 
   /* update trackers */
-  buf->tail = (buf->tail + lenIn) % buf->maxSize;
-  buf->curSize = buf->curSize + lenIn;
+  _buf->tail = (_buf->tail + _lenIn) % _buf->maxSize;
+  _buf->curSize = _buf->curSize + _lenIn;
   
   return eCBufOk;
 }
 
-cBufStatus_t cBufRead (cBuf_t* buf, uint8_t* dataOut, uint16_t lenOut)
+cBufStatus_t cBufRead (cBuf_t* _buf, uint8_t* _dataOut, uint16_t _lenOut)
 {
   /* stop condition flags */
-  if(!buf->curSize) { return eCBufEmpty; }
+  if(!_buf->curSize) { return eCBufEmpty; }
 
   /* find return length */
-  uint16_t rtnLen = lenOut;
+  uint16_t rtnLen = _lenOut;
 
-  if(buf->curSize < lenOut)
+  if(_buf->curSize < _lenOut)
   {
-    rtnLen = buf->curSize;
+    rtnLen = _buf->curSize;
 
     /* add null terminator */
-    dataOut[rtnLen] = '\0';
+    _dataOut[rtnLen] = '\0';
   }
 
   /* find space remaining in buffer */
-  uint32_t spaceTillEnd = buf->maxSize - buf->head;
+  uint32_t spaceTillEnd = _buf->maxSize - _buf->head;
 
   /* write output memory */
   if(rtnLen < spaceTillEnd)
   {
-    memcpy(&dataOut[0], &buf->data[buf->head], rtnLen);
+    memcpy(&_dataOut[0], &_buf->data[_buf->head], rtnLen);
   }
   else
   {
-    memcpy(&dataOut[0], &buf->data[buf->head], spaceTillEnd);
-    memcpy(&dataOut[spaceTillEnd], &buf->data[0], (rtnLen - spaceTillEnd));
+    memcpy(&_dataOut[0], &_buf->data[_buf->head], spaceTillEnd);
+    memcpy(&_dataOut[spaceTillEnd], &_buf->data[0], (rtnLen - spaceTillEnd));
   }
 
   /* update trackers */
-  buf->head = (buf->head + rtnLen) % buf->maxSize;
-  buf->curSize = buf->curSize - rtnLen;
+  _buf->head = (_buf->head + rtnLen) % _buf->maxSize;
+  _buf->curSize = _buf->curSize - rtnLen;
 
   return eCBufOk;
 }
 
-void cBufFree (cBuf_t* buf)
+void cBufEmpty (cBuf_t* _buf)
 {
-  free(buf->data);
-  buf->data = NULL;
-  buf->head = buf->tail = buf->curSize = buf->maxSize = 0;
+  /* clean memory */
+  int i;
+  for (i=0; i < _buf->maxSize; ++i)
+  {
+    _buf->data[i] = '\0';
+  }
+
+  /* update trackers */
+  _buf->head = _buf->tail = _buf->curSize = 0;
 }
