@@ -21,7 +21,7 @@ typedef enum
  *  - prints group name
  *  - resets test counter
  */
-void assertGroup (char* group);
+void assertGroup (char* _group);
 
 /* ************************** */
 /* ***** string asserts ***** */
@@ -30,13 +30,13 @@ void assertGroup (char* group);
  *  - compares input and expect strings for equality
  *  - uses strcmp
  */
-assertState_t assertStrEqual (char* describe, char* input, char* expect);
+assertState_t assertStrEqual (char* _describe, char* _input, char* _expect);
 
 /*  assertStrEqual
  *  - compares input and expect strings for inequality
  *  - uses strcmp
  */
-assertState_t assertStrNotEqual (char* describe, char* input, char* expect);
+assertState_t assertStrNotEqual (char* _describe, char* _input, char* _expect);
 
 
 /* *************************** */
@@ -45,22 +45,22 @@ assertState_t assertStrNotEqual (char* describe, char* input, char* expect);
 /*  assertIntEqual
  *  - compares input and expect integers for equality
  */
-assertState_t assertIntEqual (char* describe, int input, int expect);
+assertState_t assertIntEqual (char* _describe, int _input, int _expect);
 
 /*  assertIntNotEqual
  *  - compares input and expect integers for inequality
  */
-assertState_t assertIntNotEqual (char* describe, int input, int expect);
+assertState_t assertIntNotEqual (char* _describe, int _input, int _expect);
 
 /*  assertIntGreaterThan
  *  - asserts true if input is greater than expect
  */
-assertState_t assertIntGreaterThan (char* describe, int input, int expect);
+assertState_t assertIntGreaterThan (char* _describe, int _input, int _expect);
 
 /*  assertIntLessThan
  *  - asserts true if input is less than expect
  */
-assertState_t assertIntLessThan (char* describe, int input, int expect);
+assertState_t assertIntLessThan (char* _describe, int _input, int _expect);
 
 
 /* *************************** */
@@ -70,7 +70,7 @@ assertState_t assertIntLessThan (char* describe, int input, int expect);
  *  - compares each array element for equality up to length
  *  - does not compare array length or size
  */
-assertState_t assertIntArrayElements (char* describe, int* input, int* expect, int length);
+assertState_t assertIntArrayElements (char* _describe, int* _input, int* _expect, int _length);
 
 
 /* **************************** */
@@ -79,12 +79,12 @@ assertState_t assertIntArrayElements (char* describe, int* input, int* expect, i
 /*  assertPtrNull
  *  - asserts true if input is NULL
  */
-assertState_t assertPtrNull (char* describe, void* input);
+assertState_t assertPtrNull (char* _describe, void* _input);
 
 /*  assertPtrNotNull
  *  - asserts true if input is NOT NULL
  */
-assertState_t assertPtrNotNull (char* describe, void* input);
+assertState_t assertPtrNotNull (char* _describe, void* _input);
 
 
 #endif /* __UNIT_TESTS_H */

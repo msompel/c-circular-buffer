@@ -11,8 +11,8 @@ uint8_t cBufData[BUF_SIZE];
 
 uint8_t outputBuffer[128];
 
-int main (void) {
-
+int main (void) 
+{
   cBufInit(&cBuf, (uint8_t*)&cBufData, BUF_SIZE);
 
   /* ******************* */
@@ -108,6 +108,7 @@ int main (void) {
   assertIntEqual("Buffer curSize should be 0", cBuf.curSize, 0);
   assertIntEqual("Buffer head should be 0", cBuf.head, 0);
   assertIntEqual("Buffer tail should be 0", cBuf.tail, 0);
+
 
   return 0;
 }
