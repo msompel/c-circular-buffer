@@ -4,7 +4,20 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "win-build",
+      "type": "shell",
+      "command": "mingw32-make",
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "echo": false
+      }
+    },
+    {
+      "label": "linux-build",
       "type": "shell",
       "command": "make",
       "problemMatcher": [

@@ -15,7 +15,7 @@
       "environment": [],
       "externalConsole": true,
       "MIMode": "gdb",
-      "miDebuggerPath": "C:\\cygwin64\\bin\\gdb.exe",
+      "miDebuggerPath": "C:\\MinGW\\bin\\gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -23,7 +23,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "build"
+      "preLaunchTask": "win-build"
     },
     {
       "name": "Linux GDB",
@@ -44,7 +44,7 @@
               "ignoreFailures": true
           }
       ],
-      "preLaunchTask": "build"
+      "preLaunchTask": "linux-build"
     }
   ]
 }
