@@ -1,22 +1,28 @@
 #include "circularBuffer.h"
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-/* **************************** */
-/* ***** public functions ***** */
-
-void cBufInit (cBuf_t* _buf, uint8_t* _data, uint32_t _size)
+/*  cBufInit
+ *  size: size of data array
+ */
+cBufHandle_t* cBufInit (uint32_t _size)
 {
-  _buf->maxSize = _size;
-  _buf->data = _data;
+  cBufHandle_t* handle = (cBufHandle_t*)malloc(sizeof(cBufHandle_t));
+  handle->data = (uint8_t*)malloc(_size * sizeof(uint8_t));
+  handle->maxSize = _size;
 
   /* start with a clean buffer */
-  cBufEmpty(_buf);
+  cBufReset(handle);
+
+  return handle;
 }
 
-cBufStatus_t cBufWrite (cBuf_t* _buf, uint8_t* _dataIn, uint16_t _lenIn)
+/*  cBufWrite
+ *  - writes data to circular buffer
+ *  - only writes data if there is enough space available in the buffer
+ */
+cBufStatus_t cBufWrite (cBufHandle_t* _buf, uint8_t* _dataIn, uint16_t _lenIn)
 {
   /* stop condition flags */
   if((_buf->curSize + _lenIn) > _buf->maxSize) { return eCBufFull; }
@@ -42,7 +48,11 @@ cBufStatus_t cBufWrite (cBuf_t* _buf, uint8_t* _dataIn, uint16_t _lenIn)
   return eCBufOk;
 }
 
-cBufStatus_t cBufRead (cBuf_t* _buf, uint8_t* _dataOut, uint16_t _lenOut)
+/*  cBufRead
+ *  - writes data from buffer to data array
+ *  - dynamically allocates output memory, use cBufFreeData to free memory
+ */
+cBufStatus_t cBufRead (cBufHandle_t* _buf, uint8_t* _dataOut, uint16_t _lenOut)
 {
   /* stop condition flags */
   if(!_buf->curSize) { return eCBufEmpty; }
@@ -79,7 +89,10 @@ cBufStatus_t cBufRead (cBuf_t* _buf, uint8_t* _dataOut, uint16_t _lenOut)
   return eCBufOk;
 }
 
-void cBufEmpty (cBuf_t* _buf)
+/*  cBufReset
+ *  - reset the buffer
+ */
+void cBufReset (cBufHandle_t* _buf)
 {
   /* clean memory */
   int i;
@@ -90,4 +103,17 @@ void cBufEmpty (cBuf_t* _buf)
 
   /* update trackers */
   _buf->head = _buf->tail = _buf->curSize = 0;
+}
+
+/*  cBufFree
+ *  - free data buffer memory
+ *  - free handle pointer
+ */
+void cBufFree (cBufHandle_t** _buf)
+{
+  free((*_buf)->data);
+  (*_buf)->data = NULL;
+
+  free(*_buf);
+  *_buf = NULL;
 }
