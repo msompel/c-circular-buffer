@@ -18,4 +18,12 @@
 #define ANSI_RESET   "\033[0m"
 
 
+/* ************************** */
+/* **** public functions **** */
+
+/*
+ *  sets windows headers to print ansi formatting
+ */
+void ansiInit (void);
+
 #endif /* __ANSI_COLORS_H */
