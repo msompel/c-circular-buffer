@@ -1,3 +1,10 @@
+/* 
+ *  Circular FiFo Buffer
+ *
+ *  @author John E Maddox
+ *
+ *************************************************/
+
 #include "circularBuffer.h"
 #include <stdlib.h>
 #include <string.h>

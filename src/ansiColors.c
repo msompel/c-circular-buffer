@@ -1,3 +1,10 @@
+/* 
+ *  ANSI Terminal Colors
+ *
+ *  @author John E Maddox
+ *
+ *************************************************/
+
 #include "ansiColors.h"
 #include <stdio.h>
 

@@ -1,3 +1,10 @@
+/* 
+ *  Basic Unit Tests
+ *
+ *  @author John E Maddox
+ *
+ *************************************************/
+
 #include "unitTests.h"
 #include "ansiColors.h"
 #include <stdio.h>
