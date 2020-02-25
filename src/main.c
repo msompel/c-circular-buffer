@@ -1,4 +1,3 @@
-#include "ansiColors.h"
 #include "unitTests.h"
 #include "circularBuffer.h"
 
@@ -11,8 +10,6 @@ uint8_t outputBuffer[128];
 
 int main (void) 
 {
-  ansiInit();
-  
   cBufHandle_t *cBuf = cBufInit(BUF_SIZE);
 
   /* ******************* */
