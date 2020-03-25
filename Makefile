@@ -7,7 +7,7 @@ LDFLAGS = -lm
 
 # directories
 SDIR = ./src
-IDIR = ./inc
+IDIR = ./src
 ODIR = ./build
 
 # build source and object lists

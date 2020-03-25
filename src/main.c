@@ -1,116 +1,115 @@
-#include "unitTests.h"
-#include "circularBuffer.h"
+#include "unit_tests.h"
+#include "circular_buffer.h"
+#include <stdint.h>
 
 #define BUF_SIZE  32
 
-/* cBuf_t manages the circular buffer */
-cBufStatus_t status;
+cbuf_status_t status;
 
-uint8_t outputBuffer[128];
+uint8_t output_buffer[128];
 
 int main (void) 
 {
-  cBufHandle_t *cBuf = cBufInit(BUF_SIZE);
+    cbuf_handle_t *cbuf = cbuf_init(BUF_SIZE);
 
-  /* ******************* */
-  /* **** cBufWrite **** */
+    /* **************** */
+    /* ** Write Data ** */
 
-  assertGroup("cBufWrite()");
+    utest_group("Write to Buffer");
 
-  /* input greater than buffer */
-  status = cBufWrite(cBuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
-  assertIntEqual("Input greater than buffer should return eCBufFull", status, eCBufFull);
+    // input greater than buffer
+    status = cbuf_write(cbuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
+    utest_int_equal("Input greater than buffer should return CBUF_FULL", status, CBUF_FULL);
 
-  /* valid input */
-  status = cBufWrite(cBuf, (uint8_t*)"{ First Input DATA }", 20);
-  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
-  assertIntEqual("Buffer size should equal size of input", cBuf->curSize, 20);
+    // valid input
+    status = cbuf_write(cbuf, (uint8_t*)"{ First Input DATA }", 20);
+    utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
+    utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 20);
 
-  /* valid input to fill buffer to max */
-  status = cBufWrite(cBuf, (uint8_t*)"{ Second }", 10);
-  assertIntEqual("Buffer size should increase when writing", cBuf->curSize, 30);
+    // valid input to fill buffer to max
+    status = cbuf_write(cbuf, (uint8_t*)"{ Second }", 10);
+    utest_int_equal("Buffer size should increase when writing", cbuf->cur_size, 30);
 
-  /* verify buffer full flag when inserting one more byte */
-  status = cBufWrite(cBuf, (uint8_t*)"OVER", 4);
-  assertIntEqual("Writing to a full buffer should return eCBufFull", status, eCBufFull);
+    /* verify buffer full flag when inserting one more byte */
+    status = cbuf_write(cbuf, (uint8_t*)"OVER", 4);
+    utest_int_equal("Writing to a full buffer should return CBUF_FULL", status, CBUF_FULL);
 
+    /* *************** */
+    /* ** Read Data ** */
 
-  /* ******************* */
-  /* **** cBufRead **** */
+    utest_group("Read from Buffer");
 
-  assertGroup("cBufRead()");
+    /* valid read output */
+    status = cbuf_read(cbuf, output_buffer, 20);
+    utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
+    utest_int_equal("Buffer size should decrease when reading", cbuf->cur_size, 10);
+    utest_str_equal("Output string produces expected result", (char*)output_buffer, "{ First Input DATA }");
+    
 
-  /* valid read output */
-  status = cBufRead(cBuf, outputBuffer, 20);
-  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
-  assertIntEqual("Buffer size should decrease when reading", cBuf->curSize, 10);
-  assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ First Input DATA }");
+    /* *************************** */
+    /* ** Data Integrity Checks ** */
+
+    /*  End of buffer jumps to index 0 when there is free space
+    *  
+    *  When we write data that exceeds the available space at the end of the buffer, 
+    *  and there is enough space at the begining of the buffer to hold the remaining data,
+    *  the data should be written to the buffer in two chucks, one at the end and one at the beginning.
+    * 
+    *  Buffer Size: 10
+    *  Space Available: 22 (Buffer Max - Buffer Size)
+    */
+
+    utest_group("Verify Data Wrapping");
+
+    status = cbuf_write(cbuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
+    utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
+    utest_int_equal("Buffer size should equal size of input", cbuf->cur_size, 30);
+
+    cbuf_read(cbuf, output_buffer, 30);
+    utest_str_equal("Output string produces expected result", (char*)output_buffer, "{ Second }{ Wrap Input DATA. }");
+
+    /*  Null Terminating string output 
+    *  
+    *  Because the buffer is usually going to be a fixed size,
+    *  a null terminator needs to be sent when data is being read.
+    *  This is especially important when the requested data length is greater than the amount of data in the buffer.
+    * 
+    *  Buffer Size: 0
+    *  Space Available: 32 (Buffer Max - Buffer Size)
+    */
+
+    utest_group("Verify output string null terminators");
+
+    /* input equal to buffer fills entire buffer */
+    cbuf_write(cbuf, (uint8_t*)"{ This data equals buffer size }", 32);
+    cbuf_read(cbuf, output_buffer, 32);
+
+    utest_str_equal("Filling buffer should not drop any data", (char*)output_buffer, "{ This data equals buffer size }");
+
+    /* input */
+    cbuf_write(cbuf, (uint8_t*)"{ Buffer Data }", 15);
+    utest_int_equal("Buffer contains 15 bytes of data", cbuf->cur_size, 15);
+    cbuf_read(cbuf, output_buffer, 25);
+
+    utest_str_equal("Read length greater than the buffer should be null terminated", (char*)output_buffer, "{ Buffer Data }");
   
 
-  /* *************************** */
-  /* ** Data Integrity Checks ** */
+    /* ************************* */
+    /* ** data reset and free ** */
 
-  /*  End of buffer jumps to index 0 when there is free space
-   *  
-   *  When we write data that exceeds the available space at the end of the buffer, 
-   *  and there is enough space at the begining of the buffer to hold the remaining data,
-   *  the data should be written to the buffer in two chucks, one at the end and one at the beginning.
-   * 
-   *      Buffer Size: 10
-   *  Space Available: 22 (Buffer Max - Buffer Size)
-   */
+    utest_group("cbuf_reset()");
 
-  assertGroup("Verify Data Wrapping");
+    cbuf_reset(cbuf);
 
-  status = cBufWrite(cBuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
-  assertIntEqual("Should return eCBufOk when valid", status, eCBufOk);
-  assertIntEqual("Buffer size should equal size of input", cBuf->curSize, 30);
+    utest_int_equal("Buffer cur_size should be 0", cbuf_size(cbuf), 0);
+    utest_int_equal("Buffer head should be 0", cbuf->head, 0);
+    utest_int_equal("Buffer tail should be 0", cbuf->tail, 0);
 
-  cBufRead(cBuf, outputBuffer, 30);
-  assertStrEqual("Output string produces expected result", (char*)outputBuffer, "{ Second }{ Wrap Input DATA. }");
+    utest_group("cbuf_free()");
 
-  /*  Null Terminating string output 
-   *  
-   *  Because the buffer is usually going to be a fixed size,
-   *  a null terminator needs to be sent when data is being read.
-   *  This is expecially important when the requested data length is greater than the amount of data in the buffer.
-   * 
-   *      Buffer Size: 0
-   *  Space Available: 32 (Buffer Max - Buffer Size)
-   */
+    cbuf_free(&cbuf);
 
-  assertGroup("Verify output string null terminators");
+    utest_ptr_null("Buffer handle is free", cbuf);
 
-  /* input equal to buffer fills entire buffer */
-  cBufWrite(cBuf, (uint8_t*)"{ This data equals buffer size }", 32);
-  cBufRead(cBuf, outputBuffer, 32);
-
-  assertStrEqual("Filling buffer should not drop any data", (char*)outputBuffer, "{ This data equals buffer size }");
-
-  /* input */
-  cBufWrite(cBuf, (uint8_t*)"{ Buffer Data }", 15);
-  assertIntEqual("Buffer contains 15 bytes of data", cBuf->curSize, 15);
-  cBufRead(cBuf, outputBuffer, 25);
-
-  assertStrEqual("Read length greater than the buffer should be null terminated", (char*)outputBuffer, "{ Buffer Data }");
- 
-
-  /* ************************* */
-  /* ** data reset and free ** */
-
-  assertGroup("cBufReset()");
-
-  cBufReset(cBuf);
-
-  assertIntEqual("Buffer curSize should be 0", cBuf->curSize, 0);
-  assertIntEqual("Buffer head should be 0", cBuf->head, 0);
-  assertIntEqual("Buffer tail should be 0", cBuf->tail, 0);
-
-  assertGroup("cBufFree()");
-
-  cBufFree(&cBuf);
-
-  assertPtrNull("Buffer handle is free", cBuf);
-
-  return 0;
+    return 0;
 }

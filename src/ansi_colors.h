@@ -5,10 +5,10 @@
  *
  *************************************************/
  
-#ifndef __ANSI_COLORS_H
-#define __ANSI_COLORS_H
+#ifndef ANSI_COLORS_H
+#define ANSI_COLORS_H
 
-/* ANSII color codes */
+// ANSII color codes
 #define ANSI_RED     "\033[31m"
 #define ANSI_GREEN   "\033[32m"
 #define ANSI_YELLOW  "\033[33m"
@@ -18,4 +18,4 @@
 #define ANSI_RESET   "\033[0m"
 
 
-#endif /* __ANSI_COLORS_H */
+#endif // ANSI_COLORS_H
