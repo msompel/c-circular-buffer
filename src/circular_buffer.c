@@ -32,7 +32,7 @@ cbuf_status_t cbuf_write (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
 
     size_t end_space = buf->max_size - buf->tail_idx;
 
-    if (size_in < end_space)
+    if (size_in <= end_space)
     {
         memcpy(&buf->data[buf->tail_idx], &data_in[0], size_in);
     }
@@ -61,7 +61,7 @@ cbuf_status_t cbuf_read (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
 
     size_t end_space = buf->max_size - buf->head_idx;
 
-    if(size_out < end_space)
+    if(size_out <= end_space)
     {
         memcpy(&data_out[0], &buf->data[buf->head_idx], size_out);
     }
