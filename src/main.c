@@ -30,7 +30,7 @@ int main (void)
     status = cbuf_write(cbuf, (uint8_t*)"{ Second }", 10);
     utest_int_equal("Buffer size should increase when writing", cbuf->cur_size, 30);
 
-    /* verify buffer full flag when inserting one more byte */
+    // verify buffer full flag when inserting one more byte
     status = cbuf_write(cbuf, (uint8_t*)"OVER", 4);
     utest_int_equal("Writing to a full buffer should return CBUF_FULL", status, CBUF_FULL);
 
@@ -39,7 +39,7 @@ int main (void)
 
     utest_group("Read from Buffer");
 
-    /* valid read output */
+    // valid read output
     status = cbuf_read(cbuf, output_buffer, 20);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
     utest_int_equal("Buffer size should decrease when reading", cbuf->cur_size, 10);
@@ -80,13 +80,13 @@ int main (void)
 
     utest_group("Verify output string null terminators");
 
-    /* input equal to buffer fills entire buffer */
+    // input equal to buffer fills entire buffer
     cbuf_write(cbuf, (uint8_t*)"{ This data equals buffer size }", 32);
     cbuf_read(cbuf, output_buffer, 32);
 
     utest_str_equal("Filling buffer should not drop any data", (char*)output_buffer, "{ This data equals buffer size }");
 
-    /* input */
+    // input
     cbuf_write(cbuf, (uint8_t*)"{ Buffer Data }", 15);
     utest_int_equal("Buffer contains 15 bytes of data", cbuf->cur_size, 15);
     cbuf_read(cbuf, output_buffer, 25);
