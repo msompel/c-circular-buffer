@@ -2,7 +2,7 @@ TARGET = run
 
 # compiler config
 CC = gcc
-CCFLAGS = -g -c -Wall
+CCFLAGS = -g -c -Wall -std=c11
 LDFLAGS = -lm
 
 # directories
