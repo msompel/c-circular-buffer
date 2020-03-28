@@ -28,77 +28,62 @@ size_t cbuf_size (cbuf_handle_t* buf)
 
 cbuf_status_t cbuf_write (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
 {
-    // stop condition flags
-    if((buf->cur_size + size_in) > buf->max_size) { return CBUF_FULL; }
+    if ((buf->cur_size + size_in) > buf->max_size) { return CBUF_FULL; }
 
-    // write buffer memory
-    size_t space_till_end = buf->max_size - buf->tail_idx;
+    size_t end_space = buf->max_size - buf->tail_idx;
 
-    if(size_in <= space_till_end)
+    if (size_in < end_space)
     {
         memcpy(&buf->data[buf->tail_idx], &data_in[0], size_in);
     }
     else
     {
-        // wrap data to fit in buffer
-        memcpy(&buf->data[buf->tail_idx], &data_in[0], space_till_end);
-        memcpy(&buf->data[0], &data_in[space_till_end], (size_in - space_till_end));
+        memcpy(&buf->data[buf->tail_idx], &data_in[0], end_space);
+        memcpy(&buf->data[0], &data_in[end_space], (size_in - end_space));
     }
 
-    // update trackers
     buf->tail_idx = (buf->tail_idx + size_in) % buf->max_size;
     buf->cur_size = buf->cur_size + size_in;
-    
+       
     return CBUF_OK;
 }
 
 cbuf_status_t cbuf_read (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
 {
-    // stop condition flags
-    if(!buf->cur_size) { return CBUF_EMPTY; }
+    if (!buf->cur_size) { return CBUF_EMPTY; }
 
-    // find return length
-    size_t size_return = size_out;
-
-    if(buf->cur_size < size_out)
+   
+    if (buf->cur_size < size_out)
     {
-        size_return = buf->cur_size;
-
-        // add null terminator
-        data_out[size_return] = '\0';
+        size_out = buf->cur_size;
+        data_out[size_out] = '\0';
     }
 
-    // find space remaining in buffer
-    size_t space_till_end = buf->max_size - buf->head_idx;
+    size_t end_space = buf->max_size - buf->head_idx;
 
-    // write output memory
-    if(size_return < space_till_end)
+    if(size_out < end_space)
     {
-        memcpy(&data_out[0], &buf->data[buf->head_idx], size_return);
+        memcpy(&data_out[0], &buf->data[buf->head_idx], size_out);
     }
     else
     {
-        memcpy(&data_out[0], &buf->data[buf->head_idx], space_till_end);
-        memcpy(&data_out[space_till_end], &buf->data[0], (size_return - space_till_end));
+        memcpy(&data_out[0], &buf->data[buf->head_idx], end_space);
+        memcpy(&data_out[end_space], &buf->data[0], (size_out - end_space));
     }
 
-    // update trackers
-    buf->head_idx = (buf->head_idx + size_return) % buf->max_size;
-    buf->cur_size = buf->cur_size - size_return;
+    buf->head_idx = (buf->head_idx + size_out) % buf->max_size;
+    buf->cur_size = buf->cur_size - size_out;
 
     return CBUF_OK;
 }
 
 void cbuf_reset (cbuf_handle_t* buf)
 {
-    // clean memory
-    int i;
-    for (i=0; i < buf->max_size; ++i)
+    for (size_t i=0; i < buf->max_size; ++i)
     {
         buf->data[i] = '\0';
     }
 
-    // update trackers
     buf->head_idx = buf->tail_idx = buf->cur_size = 0;
 }
 
@@ -110,7 +95,3 @@ void cbuf_free (cbuf_handle_t** buf)
     free(*buf);
     *buf = NULL;
 }
-
-/* *************************** */
-/* **** private functions **** */
-

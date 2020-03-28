@@ -22,13 +22,13 @@ int main (void)
     utest_int_equal("Input greater than buffer should return CBUF_FULL", status, CBUF_FULL);
 
     // valid input
-    status = cbuf_write(cbuf, (uint8_t*)"{ First Input DATA }", 20);
+    status = cbuf_write(cbuf, (uint8_t*)"{{ First Input DATA }}", 22);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
-    utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 20);
+    utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 22);
 
     // valid input to fill buffer to max
     status = cbuf_write(cbuf, (uint8_t*)"{ Second }", 10);
-    utest_int_equal("Buffer size should increase when writing", cbuf->cur_size, 30);
+    utest_int_equal("Buffer size should increase when writing", cbuf_size(cbuf), BUF_SIZE);
 
     // verify buffer full flag when inserting one more byte
     status = cbuf_write(cbuf, (uint8_t*)"OVER", 4);
@@ -40,10 +40,10 @@ int main (void)
     utest_group("Read from Buffer");
 
     // valid read output
-    status = cbuf_read(cbuf, output_buffer, 20);
+    status = cbuf_read(cbuf, output_buffer, 22);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
-    utest_int_equal("Buffer size should decrease when reading", cbuf->cur_size, 10);
-    utest_str_equal("Output string produces expected result", (char*)output_buffer, "{ First Input DATA }");
+    utest_int_equal("Buffer size should decrease when reading", cbuf_size(cbuf), 10);
+    utest_str_equal("Output string produces expected result", (char*)output_buffer, "{{ First Input DATA }}");
     
 
     /* *************************** */
@@ -63,7 +63,7 @@ int main (void)
 
     status = cbuf_write(cbuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
-    utest_int_equal("Buffer size should equal size of input", cbuf->cur_size, 30);
+    utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 30);
 
     cbuf_read(cbuf, output_buffer, 30);
     utest_str_equal("Output string produces expected result", (char*)output_buffer, "{ Second }{ Wrap Input DATA. }");
@@ -88,7 +88,7 @@ int main (void)
 
     // input
     cbuf_write(cbuf, (uint8_t*)"{ Buffer Data }", 15);
-    utest_int_equal("Buffer contains 15 bytes of data", cbuf->cur_size, 15);
+    utest_int_equal("Buffer contains 15 bytes of data", cbuf_size(cbuf), 15);
     cbuf_read(cbuf, output_buffer, 25);
 
     utest_str_equal("Read length greater than the buffer should be null terminated", (char*)output_buffer, "{ Buffer Data }");
@@ -102,6 +102,7 @@ int main (void)
     cbuf_reset(cbuf);
 
     utest_int_equal("Buffer cur_size should be 0", cbuf_size(cbuf), 0);
+    // NOTE: these values are being accessed for testing purposes and are not part of normal operation
     utest_int_equal("Buffer head should be 0", cbuf->head_idx, 0);
     utest_int_equal("Buffer tail should be 0", cbuf->tail_idx, 0);
 
