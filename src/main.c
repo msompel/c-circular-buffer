@@ -102,8 +102,8 @@ int main (void)
     cbuf_reset(cbuf);
 
     utest_int_equal("Buffer cur_size should be 0", cbuf_size(cbuf), 0);
-    utest_int_equal("Buffer head should be 0", cbuf->head, 0);
-    utest_int_equal("Buffer tail should be 0", cbuf->tail, 0);
+    utest_int_equal("Buffer head should be 0", cbuf->head_idx, 0);
+    utest_int_equal("Buffer tail should be 0", cbuf->tail_idx, 0);
 
     utest_group("cbuf_free()");
 

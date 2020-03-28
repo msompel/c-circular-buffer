@@ -9,6 +9,7 @@
 #define UNIT_TESTS_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 //  utest_group
 //  - prints group name
@@ -53,7 +54,7 @@ bool utest_int_less (char* describe, int input, int expect);
 //  utest_int_array_equal
 //  - compares each array element for equality up to length
 //  - does not compare array length or size
-bool utest_int_array_equal (char* describe, int* input, int* expect, int length);
+bool utest_int_array_equal (char* describe, int* input, int* expect, size_t length);
 
 /* **************************** */
 /* *** null pointer asserts *** */

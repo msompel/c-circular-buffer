@@ -4,7 +4,7 @@
 #include <string.h>
 
 
-static int test_count = 1;
+static size_t test_count = 1;
 
 static void print_results (char* describe, bool state);
 static void print_str_error (char* input, char* expect, bool state);
@@ -83,11 +83,11 @@ bool utest_int_less (char* describe, int input, int expect)
     return state;
 }
 
-bool utest_int_array_equal (char* describe, int* input, int* expect, int length)
+bool utest_int_array_equal (char* describe, int* input, int* expect, size_t length)
 {
     int errors[length][3];
-    int error_count = 0;
-    int i;
+    size_t error_count = 0;
+    size_t i;
   
     // compare array elements
     for (i=0; i<length; i++)
@@ -106,7 +106,7 @@ bool utest_int_array_equal (char* describe, int* input, int* expect, int length)
         print_results(describe, false);
         for(i=0; i<error_count; i++)
         {
-            printf("    [%d]\n", errors[i][0]);
+            printf("\t[%d]\n", errors[i][0]);
             print_int_error(errors[i][1], errors[i][2], false);
         }
         return false;
@@ -143,7 +143,7 @@ bool utest_ptr_not_null (char* describe, void* input)
 static void print_results (char* describe, bool state)
 {
     char* results =  (state) ? ANSI_GREEN "Passed!" : ANSI_RED "Failed :(";
-    printf(ANSI_CYAN "  %d) %s: %s" ANSI_RESET "\n", test_count, describe, results);
+    printf(ANSI_CYAN "  %zu) %s: %s" ANSI_RESET "\n", test_count, describe, results);
     test_count++;
 }
 
@@ -151,7 +151,7 @@ static void print_str_error (char* input, char* expect, bool state)
 {
     if (!state)
     {
-        printf(ANSI_YELLOW "       INPUT: \"%s\"\n      EXPECT: \"%s\"\n" ANSI_RESET, input, expect);
+        printf(ANSI_YELLOW "\tINPUT:  \"%s\"\n\tEXPECT: \"%s\"\n" ANSI_RESET, input, expect);
     }
 }
 
@@ -159,6 +159,6 @@ static void print_int_error (int input, int expect, bool state)
 {
     if (!state)
     {
-        printf(ANSI_YELLOW "      INPUT:  \"%d\"\n      EXPECT: \"%d\"\n" ANSI_RESET, input, expect);
+        printf(ANSI_YELLOW "\tINPUT:  \"%d\"\n\tEXPECT: \"%d\"\n" ANSI_RESET, input, expect);
     }
 }
