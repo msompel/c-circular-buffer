@@ -3,7 +3,7 @@ TARGET = run
 # compiler config
 CC = gcc
 CCFLAGS = -g -c -Wall -std=c11
-LDFLAGS = -lm
+LDFLAGS = -lm -lpthread
 
 # directories
 SDIR = ./src

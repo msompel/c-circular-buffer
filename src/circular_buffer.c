@@ -1,9 +1,17 @@
 /* 
  *  Circular FiFo Buffer
  *
+ *  Thread safe, can handle multiple producers with the possibility of blocking on writes.
+ * 
+ *  - deque is always non-blocking, data is only available after it is written.
+ * 
+ *  - enque will only allow one write operation at a time, under single producer
+ *    programs this will not be an issue. With multiple producers, write overlaps return
+ *    a flag. This allows the producer to decide how to handle the collision.
+ * 
  *  @author John E Maddox
- *
- *************************************************/
+ * 
+*******************************************************************************************/
 
 #include "circular_buffer.h"
 #include <stdlib.h>
@@ -15,6 +23,7 @@ cbuf_handle_t* cbuf_init (size_t max_size)
     cbuf_handle_t* handle = (cbuf_handle_t*)malloc(sizeof(cbuf_handle_t));
     handle->data = (uint8_t*)malloc(max_size * sizeof(uint8_t));
     handle->max_size = max_size;
+    handle->is_locked = false;
 
     cbuf_reset(handle);
 
@@ -26,9 +35,14 @@ size_t cbuf_size (cbuf_handle_t* buf)
     return buf->cur_size;
 }
 
-cbuf_status_t cbuf_write (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
+cbuf_status_t cbuf_enque (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
 {
+    // NOTE: lock to prevent race conditions when 
+    //       buffer has multiple producers.
+    if (true == buf->is_locked) { return CBUF_LOCKED; }
     if ((buf->cur_size + size_in) > buf->max_size) { return CBUF_FULL; }
+
+    buf->is_locked = true;
 
     size_t end_space = buf->max_size - buf->tail_idx;
 
@@ -42,17 +56,20 @@ cbuf_status_t cbuf_write (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
         memcpy(&buf->data[0], &data_in[end_space], (size_in - end_space));
     }
 
+    // NOTE: updating tail_idx and cur_size after write operation
+    //       prevents race conditions on read operations 
     buf->tail_idx = (buf->tail_idx + size_in) % buf->max_size;
     buf->cur_size = buf->cur_size + size_in;
+    buf->is_locked = false;
        
     return CBUF_OK;
 }
 
-cbuf_status_t cbuf_read (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
+cbuf_status_t cbuf_deque (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
 {
     if (!buf->cur_size) { return CBUF_EMPTY; }
 
-   
+    // set output size by comparing available data to requested data
     if (buf->cur_size < size_out)
     {
         size_out = buf->cur_size;
