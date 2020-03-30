@@ -150,7 +150,7 @@ int main (void)
 
     cbuf_free(&cbuf);
 
-    utest_ptr_null("Buffer handle is free", cbuf);
+    utest_ptr_null("Buffer handle is null", cbuf);
 
     return 0;
 }

@@ -1,17 +1,20 @@
 /* 
  *  Circular FiFo Buffer
- *
- *  Thread safe, can handle multiple producers with the possibility of blocking on writes.
- * 
- *  - deque is always non-blocking, data is only available after it is written.
- * 
- *  - enque will only allow one write operation at a time, under single producer
- *    programs this will not be an issue. With multiple producers, write overlaps return
- *    a flag. This allows the producer to decide how to handle the collision.
- * 
+ *  
+ *  Thread safe, can handle multiple producers with the 
+ *  option of blocking on writes.
+ *  
+ *  - deque is always non-blocking, data is only available after 
+ *    it is written.
+ *  
+ *  - enque will only allow one write operation at a time, under 
+ *    single producer programs this will not be an issue. With 
+ *    multiple producers, write overlaps return a flag. This 
+ *    allows the producer to decide how to handle the collision.
+ *   
  *  @author John E Maddox
  * 
-*******************************************************************************************/
+***************************************************************/
 
 #include "circular_buffer.h"
 #include <stdlib.h>

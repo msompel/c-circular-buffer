@@ -1,3 +1,13 @@
+/* 
+ *  Unit Tests
+ * 
+ *  Basic unit testing focusing on integers, c strings, and 
+ *  pointers.
+ *
+ *  @author John E Maddox
+ *
+***************************************************************/
+
 #include "unit_tests.h"
 #include "ansi_colors.h"
 #include <stdio.h>
