@@ -34,20 +34,20 @@ int main (void)
     utest_group("Write to Buffer");
 
     // input greater than buffer
-    status = cbuf_enque(cbuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
+    status = cbuf_put(cbuf, (uint8_t*)"{ This data exceeds the buffer max size }", 41);
     utest_int_equal("Input greater than buffer should return CBUF_FULL", status, CBUF_FULL);
 
     // valid input
-    status = cbuf_enque(cbuf, (uint8_t*)"{{ First Input DATA }}", 22);
+    status = cbuf_put(cbuf, (uint8_t*)"{{ First Input DATA }}", 22);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
     utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 22);
 
     // valid input to fill buffer to max
-    status = cbuf_enque(cbuf, (uint8_t*)"{ Second }", 10);
+    status = cbuf_put(cbuf, (uint8_t*)"{ Second }", 10);
     utest_int_equal("Buffer size should increase when writing", cbuf_size(cbuf), BUF_SIZE);
 
     // verify buffer full flag when inserting one more byte
-    status = cbuf_enque(cbuf, (uint8_t*)"OVER", 4);
+    status = cbuf_put(cbuf, (uint8_t*)"OVER", 4);
     utest_int_equal("Writing to a full buffer should return CBUF_FULL", status, CBUF_FULL);
 
     /* *************** */
@@ -56,7 +56,7 @@ int main (void)
     utest_group("Read from Buffer");
 
     // valid read output
-    status = cbuf_deque(cbuf, output_buffer, 22);
+    status = cbuf_get(cbuf, output_buffer, 22);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
     utest_int_equal("Buffer size should decrease when reading", cbuf_size(cbuf), 10);
     utest_str_equal("Output string produces expected result", (char*)output_buffer, "{{ First Input DATA }}");
@@ -76,11 +76,11 @@ int main (void)
 
     utest_group("Verify Data Wrapping");
 
-    status = cbuf_enque(cbuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
+    status = cbuf_put(cbuf, (uint8_t*)"{ Wrap Input DATA. }", 20);
     utest_int_equal("Should return CBUF_OK when valid", status, CBUF_OK);
     utest_int_equal("Buffer size should equal size of input", cbuf_size(cbuf), 30);
 
-    cbuf_deque(cbuf, output_buffer, 30);
+    cbuf_get(cbuf, output_buffer, 30);
     utest_str_equal("Output string produces expected result", (char*)output_buffer, "{ Second }{ Wrap Input DATA. }");
 
     /*  Null Terminating string output 
@@ -97,15 +97,15 @@ int main (void)
     utest_group("Verify output string null terminators");
 
     // input equal to buffer fills entire buffer
-    cbuf_enque(cbuf, (uint8_t*)"{ This data equals buffer size }", 32);
-    cbuf_deque(cbuf, output_buffer, 32);
+    cbuf_put(cbuf, (uint8_t*)"{ This data equals buffer size }", 32);
+    cbuf_get(cbuf, output_buffer, 32);
 
     utest_str_equal("Filling buffer should not drop any data", (char*)output_buffer, "{ This data equals buffer size }");
 
     // input
-    cbuf_enque(cbuf, (uint8_t*)"{ Buffer Data }", 15);
+    cbuf_put(cbuf, (uint8_t*)"{ Buffer Data }", 15);
     utest_int_equal("Buffer contains 15 bytes of data", cbuf_size(cbuf), 15);
-    cbuf_deque(cbuf, output_buffer, 25);
+    cbuf_get(cbuf, output_buffer, 25);
 
     utest_str_equal("Read length greater than the buffer should be null terminated", (char*)output_buffer, "{ Buffer Data }");
 
@@ -161,7 +161,7 @@ void *input_thread (void *arg)
     //       system where writes and reads are not in sync
     for (size_t i=0; i<THREAD_BUF_SIZE; i++)
     {
-        cbuf_enque(cbuf_thread, &thread_data_in[i], 1);
+        cbuf_put(cbuf_thread, &thread_data_in[i], 1);
         sleep(1);
     }
     pthread_exit(NULL);
@@ -172,7 +172,7 @@ void *output_thread (void *arg)
     size_t length = 0;
     while (length < THREAD_BUF_SIZE)
     {
-        cbuf_deque(cbuf_thread, &thread_data_out[length], 1);
+        cbuf_get(cbuf_thread, &thread_data_out[length], 1);
         length = strlen((char*)thread_data_out);
     }
     pthread_exit(NULL);

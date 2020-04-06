@@ -38,7 +38,7 @@ size_t cbuf_size (cbuf_handle_t* buf)
     return buf->cur_size;
 }
 
-cbuf_status_t cbuf_enque (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
+cbuf_status_t cbuf_put (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
 {
     // NOTE: lock to prevent race conditions when 
     //       buffer has multiple producers.
@@ -68,7 +68,7 @@ cbuf_status_t cbuf_enque (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in)
     return CBUF_OK;
 }
 
-cbuf_status_t cbuf_deque (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
+cbuf_status_t cbuf_get (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out)
 {
     if (!buf->cur_size) { return CBUF_EMPTY; }
 

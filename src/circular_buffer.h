@@ -53,11 +53,11 @@ size_t cbuf_size (cbuf_handle_t* buf);
 // - writes data to circular buffer
 // - only writes data if there is enough space available in the buffer
 // - returns flag if attempting to write data simultaneously
-cbuf_status_t cbuf_enque (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in);
+cbuf_status_t cbuf_put (cbuf_handle_t* buf, uint8_t* data_in, size_t size_in);
 
 // - writes data from buffer to data output
 // - if buffer is empty, returns empty status flag
-cbuf_status_t cbuf_deque (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out);
+cbuf_status_t cbuf_get (cbuf_handle_t* buf, uint8_t* data_out, size_t size_out);
 
 // - clears buffer memory
 // - resets buffer counters
