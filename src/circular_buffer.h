@@ -4,10 +4,10 @@
  *  Thread safe, can handle multiple producers with the 
  *  option of blocking on writes (a flag is returned).
  *  
- *  - deque is always non-blocking, data is only available after 
+ *  - get is always non-blocking, data is only available after 
  *    it is written.
  *  
- *  - enque will only allow one write operation at a time, under 
+ *  - put will only allow one write operation at a time, under 
  *    single producer programs this will not be an issue. With 
  *    multiple producers, write overlaps return a flag. This 
  *    allows the producer to decide how to handle the collision.
