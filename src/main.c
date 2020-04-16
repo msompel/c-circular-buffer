@@ -9,15 +9,16 @@
 
 
 #define BUF_SIZE  32
-#define THREAD_BUF_SIZE 4
+#define THREAD_BUF_SIZE 5
+#define THREAD_DATA_SIZE 75
 
 cbuf_status_t status;
 uint8_t output_buffer[128];
 
 // thread setup
 cbuf_handle_t *cbuf_thread;
-uint8_t *thread_data_in = (uint8_t*)"1234";
-uint8_t thread_data_out[THREAD_BUF_SIZE];
+uint8_t thread_data_in[THREAD_DATA_SIZE] = "Integrity check for threads, more data than buffer space.";
+uint8_t thread_data_out[THREAD_DATA_SIZE];
 
 void *input_thread (void *arg);
 void *output_thread (void *arg);
@@ -113,12 +114,12 @@ int main (void)
     /* ** Threads - Common Use Case ** */
 
     /*  This tests the ability of the buffer to sync data between
-     *  threads, ensuring data can remain intact. A delay has been
-     *  added to the input thread to simulate real world devices.     *  
+     *  threads, ensuring data can remain intact. The circular 
+     *  buffer is limited so the inbound data will overflow. It is
+     *  up to the consumer how to handle full buffers.
     */
 
     utest_group("Thread Test");
-    printf(ANSI_RED "Delay simulates real world scenario, test is not hanging.\n" ANSI_RESET);
 
     pthread_t in_id;
     pthread_t out_id;
@@ -157,23 +158,38 @@ int main (void)
 
 void *input_thread (void *arg)
 {
-    // NOTE: sleep is being used to simulate a real world 
-    //       system where writes and reads are not in sync
-    for (size_t i=0; i<THREAD_BUF_SIZE; i++)
+    // FIXME: If I drop size_in below 4 the buffer locks up.
+    //        I have not had an issue on running this on devices,
+    //        probably because they are slower. My initial thought
+    //        is that there is a race condition.
+    static size_t size_in = 5;
+    
+    static size_t i = 0;
+    static cbuf_status_t status;
+
+    while (i < THREAD_DATA_SIZE)
     {
-        cbuf_put(cbuf_thread, &thread_data_in[i], 1);
-        sleep(1);
+        status = cbuf_put(cbuf_thread, &thread_data_in[i], size_in);
+        if (status == CBUF_OK)
+        {
+            i += size_in;
+        }
     }
     pthread_exit(NULL);
 }
 
 void *output_thread (void *arg)
 {
-    size_t length = 0;
-    while (length < THREAD_BUF_SIZE)
+    static size_t i = 0;
+    static cbuf_status_t status;
+
+    while (i < THREAD_DATA_SIZE)
     {
-        cbuf_get(cbuf_thread, &thread_data_out[length], 1);
-        length = strlen((char*)thread_data_out);
+        status = cbuf_get(cbuf_thread, &thread_data_out[i], 1);
+        if (status == CBUF_OK)
+        {
+            i++;
+        }
     }
     pthread_exit(NULL);
 }
